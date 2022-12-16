@@ -26,11 +26,17 @@ import "context"
 
 // Job ...
 type Job struct {
+	name  string
 	tasks []Runner
 }
 
-// Register ...
-func (j *Job) Register(task Runner) {
+// NewJob ...
+func NewJob(name string) *Job {
+	return &Job{name: name}
+}
+
+// Task ...
+func (j *Job) Task(task Runner) {
 	j.tasks = append(j.tasks, task)
 }
 
@@ -46,5 +52,5 @@ func (j *Job) Run(ctx context.Context) error {
 
 // String ...
 func (j *Job) String() string {
-	return ""
+	return j.name
 }

@@ -32,6 +32,35 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+func TestString(t *testing.T) {
+	name := "this is a test"
+	job := brite.NewJob(name)
+
+	assert.Equal(t, name, job.String())
+}
+
+func TestRunSynchronousTask(t *testing.T) {
+	m := mockTask(t)
+	m.On("Run", mock.Anything).Return(nil)
+
+	job := brite.NewJob("job 1")
+	job.Task(m)
+	err := job.Run(context.Background())
+
+	assert.NoError(t, err)
+}
+
+func TestRunSynchronousTaskError(t *testing.T) {
+	m := mockTask(t)
+	m.On("Run", mock.Anything).Return(errors.New("task error"))
+
+	job := brite.NewJob("job 2")
+	job.Task(m)
+	err := job.Run(context.Background())
+
+	assert.EqualError(t, err, "task error")
+}
+
 type runnerMock struct {
 	mock.Mock
 }
@@ -45,7 +74,7 @@ func (m *runnerMock) String() string {
 	return "mock"
 }
 
-func newTask(t testing.TB) *runnerMock {
+func mockTask(t testing.TB) *runnerMock {
 	t.Helper()
 
 	mock := &runnerMock{}
@@ -56,26 +85,4 @@ func newTask(t testing.TB) *runnerMock {
 	})
 
 	return mock
-}
-
-func TestExecuteTask(t *testing.T) {
-	m := newTask(t)
-	m.On("Run", mock.Anything).Return(nil)
-
-	job := brite.Job{}
-	job.Register(m)
-	err := job.Run(context.Background())
-
-	assert.NoError(t, err)
-}
-
-func TestExecuteTaskError(t *testing.T) {
-	m := newTask(t)
-	m.On("Run", mock.Anything).Return(errors.New("task error"))
-
-	job := brite.Job{}
-	job.Register(m)
-	err := job.Run(context.Background())
-
-	assert.EqualError(t, err, "task error")
 }
