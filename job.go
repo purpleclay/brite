@@ -47,6 +47,10 @@ func (j *Job) Register(task Runner) {
 // is halted upon the first error encountered.
 func (j *Job) Run(ctx context.Context) error {
 	for _, task := range j.tasks {
+		if task.Skip(ctx) {
+			continue
+		}
+
 		if err := task.Run(ctx); err != nil {
 			return err
 		}

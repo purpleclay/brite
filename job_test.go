@@ -41,6 +41,7 @@ func TestString(t *testing.T) {
 
 func TestRunSynchronousTask(t *testing.T) {
 	m := mockTask(t)
+	m.On("Skip", mock.Anything).Return(false)
 	m.On("Run", mock.Anything).Return(nil)
 
 	job := brite.NewJob("job 1")
@@ -52,6 +53,7 @@ func TestRunSynchronousTask(t *testing.T) {
 
 func TestRunSynchronousTaskError(t *testing.T) {
 	m := mockTask(t)
+	m.On("Skip", mock.Anything).Return(false)
 	m.On("Run", mock.Anything).Return(errors.New("task error"))
 
 	job := brite.NewJob("job 2")
@@ -61,6 +63,17 @@ func TestRunSynchronousTaskError(t *testing.T) {
 	assert.EqualError(t, err, "task error")
 }
 
+func TestSkip(t *testing.T) {
+	m := mockTask(t)
+	m.On("Skip", mock.Anything).Return(true)
+
+	job := brite.NewJob("job 3")
+	job.Register(m)
+	job.Run(context.Background())
+
+	m.AssertNotCalled(t, "Run")
+}
+
 type runnerMock struct {
 	mock.Mock
 }
@@ -68,6 +81,11 @@ type runnerMock struct {
 func (m *runnerMock) Run(ctx context.Context) error {
 	args := m.Called(ctx)
 	return args.Error(0)
+}
+
+func (m *runnerMock) Skip(ctx context.Context) bool {
+	args := m.Called(ctx)
+	return args.Bool(0)
 }
 
 func (m *runnerMock) String() string {

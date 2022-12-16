@@ -34,4 +34,7 @@ type Runner interface {
 	// Runs the task. A context allows the task to support timeouts, cancellation
 	// and basic passing of values.
 	Run(ctx context.Context) error
+
+	// Skip is used to define conditions, that if met, will cause the task to be skipped.
+	Skip(ctx context.Context) bool
 }
