@@ -44,7 +44,7 @@ func TestRunSynchronousTask(t *testing.T) {
 	m.On("Run", mock.Anything).Return(nil)
 
 	job := brite.NewJob("job 1")
-	job.Task(m)
+	job.Register(m)
 	err := job.Run(context.Background())
 
 	assert.NoError(t, err)
@@ -55,7 +55,7 @@ func TestRunSynchronousTaskError(t *testing.T) {
 	m.On("Run", mock.Anything).Return(errors.New("task error"))
 
 	job := brite.NewJob("job 2")
-	job.Task(m)
+	job.Register(m)
 	err := job.Run(context.Background())
 
 	assert.EqualError(t, err, "task error")

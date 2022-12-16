@@ -24,23 +24,27 @@ package brite
 
 import "context"
 
-// Job ...
+// Job defines a way of registering a series of tasks and executing them
+// in registration order.
 type Job struct {
 	name  string
 	tasks []Runner
 }
 
-// NewJob ...
+// NewJob creates a new named job.
 func NewJob(name string) *Job {
 	return &Job{name: name}
 }
 
-// Task ...
-func (j *Job) Task(task Runner) {
+// Register a new synchronous task with this job. Registration order
+// is guaranteed to be preserved.
+func (j *Job) Register(task Runner) {
 	j.tasks = append(j.tasks, task)
 }
 
-// Run ...
+// Run the job. A job can consist of any number of tasks, each being
+// executed in the order they are registered. Execution of the job
+// is halted upon the first error encountered.
 func (j *Job) Run(ctx context.Context) error {
 	for _, task := range j.tasks {
 		if err := task.Run(ctx); err != nil {
@@ -50,7 +54,7 @@ func (j *Job) Run(ctx context.Context) error {
 	return nil
 }
 
-// String ...
+// String returns the name of this job.
 func (j *Job) String() string {
 	return j.name
 }
